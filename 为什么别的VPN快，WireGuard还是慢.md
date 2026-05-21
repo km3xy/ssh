@@ -169,6 +169,258 @@ BBR 已开启 ✅（优化拥塞控制）
 3. 所有功能免费，无需额外开通权限
 
 
+直接复制这条提示词，在阿里云AI命令助手内使用
+
+
+配置Nginx，默认优先加载index.php、index.html、index.htm，开启目录浏览功能，写入默认首页文件，生成站点配置并重载Nginx，适配Alibaba Cloud Linux/CentOS
+
+
+最终生成的命令（参考，也可直接手动执行）
+
+# 新建站点配置
+tee /etc/nginx/conf.d/default.conf >/dev/null <<'EOF'
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # 优先级：php > html > htm
+    index index.php index.html index.htm;
+
+    # 开启目录浏览
+    autoindex on;
+    autoindex_exact_size off;
+    autoindex_localtime on;
+
+    # PHP解析配置
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+EOF
+
+# 写入简易默认首页
+tee /usr/share/nginx/html/index.htm >/dev/null <<'EOF'
+<h1>Nginx 运行正常</h1>
+<p>支持 index.php / index.html / index.htm | 已开启目录浏览</p>
+EOF
+
+# 校验配置并重载
+nginx -t
+systemctl reload nginx
+
+
+补充说明
+ 
+1. 如需解析PHP，必须提前安装PHP-FPM，可搭配这条提示词一并使用：
+
+2. 目录浏览仅在对应目录无默认首页文件时生效。
+
+
+
+
+
+✅ 腾讯云轻量「自动化助手」（TAT）AI 版提示词
+ 
+直接复制到腾讯云 自动化助手 → 执行命令 → AI 对话框 发送：
+
+
+安装配置Nginx，默认首页优先级 index.php、index.html、index.htm，开启目录浏览 autoindex，写入默认首页，生成站点配置，重载Nginx；并安装php-fpm、设置开机自启、启动服务，确保PHP可解析
+
+📌 腾讯云这边操作入口（和阿里云不一样）
+ 
+1. 登录腾讯云 → 轻量应用服务器 Lighthouse
+​
+2. 点进你的实例
+​
+3. 顶部：自动化助手（不是“命令助手”）
+​
+4. 右上角：执行命令
+​
+5. 命令类型：Shell
+​
+6. 输入框里：右键 → AI 助手（或点小机器人图标） 
+​
+7. 把上面提示词粘贴进去 → 回车 → 生成命令 → 插入 → 执行
+ 
+ 
+ 
+📄 最终会生成的 Nginx 配置（直接可用）
+
+
+# 写入 Nginx 配置
+tee /etc/nginx/conf.d/default.conf >/dev/null <<'EOF'
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # 优先顺序：php → html → htm
+    index index.php index.html index.htm;
+
+    # 开启目录浏览
+    autoindex on;
+    autoindex_exact_size off;
+    autoindex_localtime on;
+
+    # PHP 解析
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+EOF
+
+# 写一个默认首页
+tee /usr/share/nginx/html/index.htm >/dev/null <<'EOF'
+<h1>腾讯云轻量 Nginx 就绪</h1>
+<p>支持：index.php / index.html / index.htm | 目录浏览已开启</p>
+EOF
+
+# 安装 php-fpm（腾讯云常见包名）
+yum install -y php-fpm
+systemctl enable php-fpm
+systemctl start php-fpm
+
+# 检查配置、重载 Nginx
+nginx -t
+systemctl reload nginx
+
+
+
+✅ 效果
+ 
+- 访问 IP：优先跑  index.php  →  index.html  →  index.htm 
+​
+- 都没有时：显示目录列表 
+​
+-  .php  文件能正常解析（已装并启动 php-fpm）
+ 
+你要不要我直接给你做一张腾讯云 Lighthouse 从登录→打开AI→执行这条命令的图文流程图？
+
+
+
+下面给你一份手机端（微信/QQ浏览器 + 腾讯云小程序）专用的：从打开腾讯云 → 进轻量 → 自动化助手 AI → 配置 Nginx+PHP+目录浏览，全程手机点按+复制粘贴即可。
+ 
+ 
+ 
+📱 一、手机端入口（用腾讯云小程序最顺手）
+ 
+1. 微信搜索：腾讯云 → 进入官方小程序
+​
+2. 登录 → 首页点 轻量应用服务器
+​
+3. 点进你那台 运行中 的实例
+
+
+⚙️ 二、进入「自动化助手」→「执行命令」
+ 
+手机端顶部横向滑动，找到并点：
+ 
+- 自动化助手（Lighthouse 里叫 TAT） 
+​
+- 右上角 执行命令
+​
+- 命令类型：选 Shell
+​
+- 名称随便写： nginx-php-autoindex 
+ 
+ 
+ 
+🤖 三、唤起手机端 AI 助手（关键）
+ 
+在命令内容输入框里：
+ 
+1. 长按输入框 → 弹出菜单 → 选 AI助手（小机器人） 
+​
+2. 或点输入框上方的 AI 图标
+​
+3. AI 对话框出现后，直接粘贴下面提示词：
+ 
+✅ 手机端专用提示词（复制这一段）
+
+
+安装配置Nginx，默认首页优先级 index.php、index.html、index.htm，开启目录浏览 autoindex on，写入默认首页文件，生成站点配置并重载Nginx；同时安装php-fpm，设置开机自启并启动服务，确保PHP可正常解析
+
+
+发送后，AI 会自动生成一长串 Shell 命令。
+→ 点 插入命令 → 命令自动填到输入框。
+ 
+ 
+ 
+▶️ 四、手机端执行 & 看结果
+ 
+1. 确认命令已插入 → 点底部 执行
+​
+2. 手机会滚动显示日志，等待出现：
+​
+-  nginx -t  提示 test is successful
+​
+-  systemctl reload nginx  无报错
+​
+3. 打开手机浏览器，访问服务器 公网 IP
+​
+- 看到： 腾讯云轻量 Nginx 运行正常 
+​
+- 无 index 文件时，自动列出目录
+
+🧩 五、手机端备用：直接粘贴命令（AI 抽风时用）
+ 
+如果 AI 没反应，直接把下面整段复制，粘贴到命令框执行：
+
+tee /etc/nginx/conf.d/default.conf >/dev/null <<'EOF'
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.php index.html index.htm;
+    autoindex on;
+    autoindex_exact_size off;
+    autoindex_localtime on;
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+EOF
+
+tee /usr/share/nginx/html/index.htm >/dev/null <<'EOF'
+<h1>腾讯云轻量 Nginx 运行正常</h1>
+<p>支持 index.php / index.html / index.htm，目录浏览已开启</p>
+EOF
+
+yum install -y php-fpm
+systemctl enable php-fpm
+systemctl start php-fpm
+nginx -t
+systemctl reload nginx
+
+📌 六、手机端常见小坑
+ 
+- 粘贴时 一定要长按输入框，否则可能只能粘一行
+​
+- 若提示  command not found ：先执行  yum install -y nginx  再重试
+​
+- 80 端口打不开：轻量防火墙 → 放行 TCP 80
+ 
+ 
+ 
+要不要我把上面流程，再给你出一张手机端一步一图的流程图（适合保存到相册对照点）？
+
+
+
+代码及教程由豆包指导
+
+
+
+
 
 
 
